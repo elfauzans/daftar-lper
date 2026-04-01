@@ -133,6 +133,14 @@ export default function RegisterForm() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (!form.nik || form.nik.length !== 16) {
+              alert("NIK harus 16 digit angka!");
+              return;
+            }
+            if (!form.hp || form.hp.length < 10 || form.hp.length > 13) {
+              alert("Nomor HP harus 10–13 digit angka!");
+              return;
+            }
             setOpenConfirm(true);
           }}
           className="space-y-6 bg-gray-50 p-6 rounded-2xl shadow-sm"
@@ -225,19 +233,73 @@ export default function RegisterForm() {
             onChange={(val) => setField("pekerjaan", val)}
           />
 
-          {/* HP */}
-          <Input
-            label="Nomor HP / WhatsApp"
-            value={form.hp}
-            onChange={(val) => setField("hp", val)}
-          />
+          <div>
+            <label className="text-sm font-medium">Nomor HP / WhatsApp</label>
 
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={form.hp}
+              onChange={(e) => {
+                let val = e.target.value.replace(/\D/g, "");
+
+                if (val.startsWith("08")) {
+                  val = "628" + val.slice(2);
+                }
+
+                // 🔥 hanya angka
+                val = val.replace(/\D/g, "");
+
+                // 🔥 max 13 digit
+                if (val.length > 13) return;
+
+                setField("hp", val);
+              }}
+              className="w-full mt-1 p-3 rounded-lg border focus:ring-2 focus:ring-green-500 outline-none"
+              placeholder="Contoh: 081234567890"
+              required
+            />
+
+            {/* VALIDASI MESSAGE */}
+            {form.hp && (form.hp.length < 10 || form.hp.length > 13) && (
+              <p className="text-red-500 text-sm mt-1">
+                Nomor HP harus 10–13 digit angka
+              </p>
+            )}
+          </div>
           {/* NIK */}
-          <Input
-            label="NIK"
-            value={form.nik}
-            onChange={(val) => setField("nik", val)}
-          />
+          <div>
+            <label className="text-sm font-medium">NIK</label>
+
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={form.nik}
+              onChange={(e) => {
+                let val = e.target.value;
+
+                // 🔥 HANYA ANGKA
+                val = val.replace(/\D/g, "");
+
+                // 🔥 MAX 16 DIGIT
+                if (val.length > 16) return;
+
+                setField("nik", val);
+              }}
+              className="w-full mt-1 p-3 rounded-lg border focus:ring-2 focus:ring-green-500 outline-none"
+              placeholder="Masukkan 16 digit NIK"
+              required
+            />
+
+            {/* VALIDASI MESSAGE */}
+            {form.nik && form.nik.length !== 16 && (
+              <p className="text-red-500 text-sm mt-1">
+                NIK harus 16 digit angka
+              </p>
+            )}
+          </div>
 
           {/* UPLOAD */}
           <div>
