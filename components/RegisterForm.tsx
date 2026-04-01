@@ -15,6 +15,12 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 
+export const metadata = {
+  title: "Daftar Anggota Koperasi",
+  description:
+    "Isi form pendaftaran anggota koperasi LPER secara online dengan mudah.",
+};
+
 async function compressImage(file: File): Promise<File> {
   return new Promise((resolve) => {
     const reader = new FileReader();
