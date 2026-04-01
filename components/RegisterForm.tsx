@@ -4,10 +4,79 @@ import { useAuthStore } from "@/stores/authStores";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDaerahStore } from "@/stores/daerahStore";
 import { useEffect, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
+async function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // resize max width (biar ga gede banget)
+        const MAX_WIDTH = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > MAX_WIDTH) {
+          height = (height * MAX_WIDTH) / width;
+          width = MAX_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // compress quality
+        let quality = 0.8;
+
+        const compressLoop = () => {
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) return;
+
+              // kalau masih > 3MB, turunin quality
+              if (blob.size > 3 * 1024 * 1024 && quality > 0.3) {
+                quality -= 0.1;
+                compressLoop();
+              } else {
+                const compressedFile = new File([blob], file.name, {
+                  type: "image/jpeg",
+                });
+                resolve(compressedFile);
+              }
+            },
+            "image/jpeg",
+            quality,
+          );
+        };
+
+        compressLoop();
+      };
+    };
+  });
+}
 
 export default function RegisterForm() {
-  const { form, setField, submit, loading, error, success, reset } =
+  const { form, setField, submit, loading, error, status, reset } =
     useAuthStore();
+  const [openConfirm, setOpenConfirm] = useState(false);
 
   const {
     provinsi,
@@ -58,7 +127,7 @@ export default function RegisterForm() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            submit();
+            setOpenConfirm(true);
           }}
           className="space-y-6 bg-gray-50 p-6 rounded-2xl shadow-sm"
         >
@@ -172,7 +241,35 @@ export default function RegisterForm() {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setField("ktp", e.target.files?.[0] || null)}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  // ✅ VALIDASI SIZE AWAL (sebelum compress)
+                  if (file.size > 5 * 1024 * 1024) {
+                    alert("File terlalu besar! Maksimal 5MB.");
+                    return;
+                  }
+
+                  // ✅ VALIDASI TYPE
+                  if (!file.type.startsWith("image/")) {
+                    alert("File harus berupa gambar!");
+                    return;
+                  }
+
+                  // ✅ COMPRESS
+                  const compressed = await compressImage(file);
+
+                  // ✅ VALIDASI HASIL COMPRESS
+                  if (compressed.size > 3 * 1024 * 1024) {
+                    alert(
+                      "Gagal mengkompres gambar di bawah 3MB, coba gambar lain.",
+                    );
+                    return;
+                  }
+
+                  setField("ktp", compressed);
+                }}
                 className="hidden"
                 id="ktpUpload"
               />
@@ -209,7 +306,7 @@ export default function RegisterForm() {
 
       {/* ================= MODAL ================= */}
       <AnimatePresence>
-        {(success || error) && (
+        {(status || error) && (
           <motion.div
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
             initial={{ opacity: 0 }}
@@ -223,16 +320,16 @@ export default function RegisterForm() {
               className="bg-white rounded-2xl p-8 w-[90%] max-w-md text-center shadow-xl"
             >
               {/* ICON */}
-              <div className="text-5xl mb-4">{success ? "✅" : "❌"}</div>
+              <div className="text-5xl mb-4">{status ? "✅" : "❌"}</div>
 
               {/* TITLE */}
               <h3 className="text-xl font-bold mb-2">
-                {success ? "Berhasil!" : "Gagal"}
+                {status ? "Berhasil!" : "Gagal"}
               </h3>
 
               {/* MESSAGE */}
               <p className="text-gray-600 mb-6">
-                {success
+                {status
                   ? "Pendaftaran berhasil, silakan tunggu approval."
                   : error}
               </p>
@@ -241,7 +338,7 @@ export default function RegisterForm() {
               <button
                 onClick={reset}
                 className={`w-full py-3 rounded-xl text-white ${
-                  success
+                  status
                     ? "bg-green-500 hover:bg-green-600"
                     : "bg-red-500 hover:bg-red-600"
                 }`}
@@ -252,6 +349,32 @@ export default function RegisterForm() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={openConfirm} onOpenChange={setOpenConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Yakin data sudah benar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Pastikan semua data yang Anda isi sudah sesuai sebelum dikirim.
+              Data tidak dapat diubah setelah dikirim.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={() => {
+                setOpenConfirm(false);
+                submit(); // baru submit di sini
+              }}
+              className="bg-green-500 hover:bg-green-600"
+            >
+              Ya, Kirim
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
