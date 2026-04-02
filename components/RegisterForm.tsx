@@ -3,7 +3,8 @@
 import { useAuthStore } from "@/stores/authStores";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDaerahStore } from "@/stores/daerahStore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import SignatureCanvas from "react-signature-canvas";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -84,6 +85,9 @@ export default function RegisterForm() {
     useAuthStore();
   const [openConfirm, setOpenConfirm] = useState(false);
 
+  const [signatureMode, setSignatureMode] = useState<"draw" | "upload">("draw");
+  const sigRef = useRef<SignatureCanvas | null>(null);
+
   const {
     provinsi,
     fetchProvinsi,
@@ -97,6 +101,20 @@ export default function RegisterForm() {
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
+
+  useEffect(() => {
+    const canvas = sigRef.current?.getCanvas();
+    if (!canvas) return;
+
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = canvas.getBoundingClientRect();
+
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+
+    const ctx = canvas.getContext("2d");
+    ctx?.scale(ratio, ratio);
+  }, []);
 
   useEffect(() => {
     fetchProvinsi();
@@ -137,10 +155,21 @@ export default function RegisterForm() {
               alert("NIK harus 16 digit angka!");
               return;
             }
-            if (!form.hp || form.hp.length < 10 || form.hp.length > 13) {
+            if (!form.hp || form.hp.length < 10 || form.hp.length > 14) {
               alert("Nomor HP harus 10–13 digit angka!");
               return;
             }
+
+            if (!form.signature) {
+              alert("Tanda tangan wajib diisi!");
+              return;
+            }
+
+            if (!form.gender) {
+              alert("Pilih jenis kelamin!");
+              return;
+            }
+
             setOpenConfirm(true);
           }}
           className="space-y-6 bg-gray-50 p-6 rounded-2xl shadow-sm"
@@ -252,7 +281,7 @@ export default function RegisterForm() {
                 val = val.replace(/\D/g, "");
 
                 // 🔥 max 13 digit
-                if (val.length > 13) return;
+                if (val.length > 14) return;
 
                 setField("hp", val);
               }}
@@ -262,12 +291,41 @@ export default function RegisterForm() {
             />
 
             {/* VALIDASI MESSAGE */}
-            {form.hp && (form.hp.length < 10 || form.hp.length > 13) && (
+            {form.hp && (form.hp.length < 10 || form.hp.length > 14) && (
               <p className="text-red-500 text-sm mt-1">
                 Nomor HP harus 10–13 digit angka
               </p>
             )}
           </div>
+
+          <div>
+            <label className="text-sm font-medium">Jenis Kelamin</label>
+
+            <div className="flex gap-4 mt-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="L"
+                  checked={form.gender === "L"}
+                  onChange={(e) => setField("gender", e.target.value)}
+                />
+                Laki-laki
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="P"
+                  checked={form.gender === "P"}
+                  onChange={(e) => setField("gender", e.target.value)}
+                />
+                Perempuan
+              </label>
+            </div>
+          </div>
+
           {/* NIK */}
           <div>
             <label className="text-sm font-medium">NIK</label>
@@ -361,6 +419,106 @@ export default function RegisterForm() {
             )}
           </div>
 
+          <div>
+            <label className="text-sm font-medium">Tanda Tangan</label>
+
+            <div className="flex gap-3 mt-2">
+              <button
+                type="button"
+                onClick={() => setSignatureMode("draw")}
+                className={`px-4 py-2 rounded-lg border ${
+                  signatureMode === "draw" ? "bg-green-500 text-white" : ""
+                }`}
+              >
+                Gambar
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSignatureMode("upload")}
+                className={`px-4 py-2 rounded-lg border ${
+                  signatureMode === "upload" ? "bg-green-500 text-white" : ""
+                }`}
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+
+          {signatureMode === "draw" && (
+            <div className="mt-3 border rounded-lg p-3">
+              <SignatureCanvas
+                ref={sigRef}
+                penColor="black"
+                onEnd={() => {
+                  if (!sigRef.current) return;
+
+                  if (!sigRef.current.isEmpty()) {
+                    const dataUrl = sigRef.current.toDataURL("image/png");
+                    setField("signature", dataUrl);
+                  }
+                }}
+                canvasProps={{
+                  className: "border rounded-lg w-full h-52",
+                }}
+              />
+
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => sigRef.current?.clear()}
+                  className="px-3 py-1 bg-gray-200 rounded"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+
+          {signatureMode === "upload" && (
+            <div className="mt-3">
+              <input
+                type="file"
+                accept="image/*"
+                id="signatureUpload"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  const compressed = await compressImage(file);
+
+                  const reader = new FileReader();
+                  reader.readAsDataURL(compressed);
+
+                  reader.onload = () => {
+                    setField("signature", reader.result as string);
+                  };
+                }}
+              />
+
+              {/* 🔥 TOMBOL CUSTOM */}
+              <label
+                htmlFor="signatureUpload"
+                className="cursor-pointer inline-block px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
+                Upload Tanda Tangan
+              </label>
+
+              {/* PREVIEW */}
+              {form.signature && (
+                <div className="mt-3">
+                  <p className="text-sm text-green-600">
+                    ✔ Tanda tangan berhasil diupload
+                  </p>
+                  <img
+                    src={form.signature}
+                    className="mt-2 w-40 border rounded"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           {/* BUTTON */}
           <button
             type="submit"

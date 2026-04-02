@@ -20,6 +20,8 @@ const initialForm: RegisterPayload = {
   pekerjaan: "",
   hp: "",
   nik: "",
+  gender: "L", // default bisa L / kosong juga boleh
+  signature: "", // base64
   ktp: null,
 };
 

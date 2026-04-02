@@ -9,6 +9,8 @@ export interface RegisterPayload {
   pekerjaan: string;
   hp: string;
   nik: string;
+  gender: "L" | "P";
+  signature: string;
   ktp: File | null;
 }
 
@@ -32,6 +34,10 @@ export const registerService = async (
     formData.append("hp", payload.hp);
     formData.append("nik", payload.nik);
 
+    // ✅ TAMBAHAN BARU
+    formData.append("gender", payload.gender);
+    formData.append("signature", payload.signature);
+
     if (payload.ktp) {
       formData.append("ktp", payload.ktp);
     }
@@ -48,6 +54,6 @@ export const registerService = async (
 
     return res.data;
   } catch (err) {
-    throw err; // sudah dihandle di api.ts
+    throw err;
   }
 };
