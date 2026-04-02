@@ -103,20 +103,6 @@ export default function RegisterForm() {
   );
 
   useEffect(() => {
-    const canvas = sigRef.current?.getCanvas();
-    if (!canvas) return;
-
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    const rect = canvas.getBoundingClientRect();
-
-    canvas.width = rect.width * ratio;
-    canvas.height = rect.height * ratio;
-
-    const ctx = canvas.getContext("2d");
-    ctx?.scale(ratio, ratio);
-  }, []);
-
-  useEffect(() => {
     fetchProvinsi();
   }, []);
 
@@ -450,16 +436,20 @@ export default function RegisterForm() {
               <SignatureCanvas
                 ref={sigRef}
                 penColor="black"
+                backgroundColor="white" // 🔥 WAJIB (biar ga transparan)
                 onEnd={() => {
                   if (!sigRef.current) return;
 
                   if (!sigRef.current.isEmpty()) {
-                    const dataUrl = sigRef.current.toDataURL("image/png");
+                    const dataUrl = sigRef.current
+                      .getTrimmedCanvas()
+                      .toDataURL("image/png");
+
                     setField("signature", dataUrl);
                   }
                 }}
                 canvasProps={{
-                  className: "border rounded-lg w-full h-52",
+                  className: "border rounded-lg w-full h-52 bg-white",
                 }}
               />
 
