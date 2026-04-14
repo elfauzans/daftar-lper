@@ -28,38 +28,40 @@ export default function Hero() {
       </div>
 
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-6 md:gap-10 items-start relative z-10 pb-32">
-        {/* ================= TEXT ================= */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center md:text-left mt-6 md:mt-16"
         >
-          {/* 🔥 H1 SEO */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold leading-tight mb-4 text-[#1e3a72]">
-            Koperasi LPER Indonesia <br />
-            <span className="text-[#16a34a]">
-              Daftar Anggota Koperasi Online
-            </span>
-          </h1>
-
-          {/* 🔥 DESCRIPTION SEO */}
-          <p className="text-gray-600 mb-6 text-sm sm:text-base max-w-lg">
-            Koperasi LPER adalah koperasi simpan pinjam terpercaya di Indonesia
-            yang membantu pemberdayaan ekonomi masyarakat melalui sistem modern,
-            teknologi kandang, dan kemitraan berkelanjutan.
+          {/* LABEL */}
+          <p className="text-sm sm:text-base font-medium text-gray-500 mb-2 tracking-wide">
+            Koperasi LPER Indonesia
           </p>
 
-          {/* 🔥 KEYWORD BOOST */}
-          <div className="space-y-2 mb-6 text-gray-700 text-sm sm:text-base">
-            <p>✅ Koperasi simpan pinjam terpercaya</p>
-            <p>✅ Daftar koperasi online mudah</p>
-            <p>✅ Pemberdayaan ekonomi peternak</p>
-          </div>
+          {/* HEADLINE */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.2] text-[#1e3a72] mb-3">
+            Bergabung & Tumbuh <br />
+            Bersama Peternak Indonesia
+          </h1>
 
-          {/* CTA */}
+          {/* SUB HEADLINE (HIGHLIGHT) */}
+          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#16a34a] mb-4">
+            Daftar Anggota Koperasi LPER Indonesia
+          </h2>
+
+          <p className="text-gray-600 mb-6 text-sm sm:text-base max-w-lg leading-relaxed">
+            Koperasi Produsen Usaha LPER adalah koperasi yang berfokus pada
+            sektor peternakan ayam layer dan broiler, dengan sistem usaha
+            terpadu dari hulu hingga hilir. Kegiatan kami mencakup pembibitan,
+            penyediaan sarana produksi ternak (sapronak), hingga proses
+            budidaya. Melalui pengelolaan yang terstruktur dan berorientasi pada
+            pemberdayaan, kami berkomitmen mewujudkan kebangkitan peternak
+            rakyat serta meningkatkan kemandirian dan kesejahteraan anggota.
+          </p>
+
           <a
             href="#daftar"
-            className="inline-block bg-[#1e3a72] text-white px-6 py-3 rounded-xl hover:bg-[#16305f] transition shadow-md"
+            className="inline-block bg-[#1e3a72] text-white px-6 py-3 rounded-xl hover:bg-[#16305f] transition shadow-md font-medium"
           >
             Daftar Anggota Sekarang →
           </a>
