@@ -85,7 +85,6 @@ export default function RegisterForm() {
     useAuthStore();
   const [openConfirm, setOpenConfirm] = useState(false);
 
-  const [signatureMode, setSignatureMode] = useState<"draw" | "upload">("draw");
   const sigRef = useRef<SignatureCanvas | null>(null);
 
   const {
@@ -408,35 +407,11 @@ export default function RegisterForm() {
           <div>
             <label className="text-sm font-medium">Tanda Tangan</label>
 
-            <div className="flex gap-3 mt-2">
-              <button
-                type="button"
-                onClick={() => setSignatureMode("draw")}
-                className={`px-4 py-2 rounded-lg border ${
-                  signatureMode === "draw" ? "bg-green-500 text-white" : ""
-                }`}
-              >
-                Gambar
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSignatureMode("upload")}
-                className={`px-4 py-2 rounded-lg border ${
-                  signatureMode === "upload" ? "bg-green-500 text-white" : ""
-                }`}
-              >
-                Upload
-              </button>
-            </div>
-          </div>
-
-          {signatureMode === "draw" && (
             <div className="mt-3 border rounded-lg p-3">
               <SignatureCanvas
                 ref={sigRef}
                 penColor="black"
-                backgroundColor="white" // 🔥 WAJIB (biar ga transparan)
+                backgroundColor="white"
                 onEnd={() => {
                   if (!sigRef.current) return;
 
@@ -456,59 +431,24 @@ export default function RegisterForm() {
               <div className="flex gap-2 mt-2">
                 <button
                   type="button"
-                  onClick={() => sigRef.current?.clear()}
+                  onClick={() => {
+                    sigRef.current?.clear();
+                    setField("signature", ""); // 🔥 penting
+                  }}
                   className="px-3 py-1 bg-gray-200 rounded"
                 >
                   Clear
                 </button>
               </div>
             </div>
-          )}
 
-          {signatureMode === "upload" && (
-            <div className="mt-3">
-              <input
-                type="file"
-                accept="image/*"
-                id="signatureUpload"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+            {!form.signature && (
+              <p className="text-red-500 text-sm mt-2">
+                Tanda tangan wajib diisi
+              </p>
+            )}
+          </div>
 
-                  const compressed = await compressImage(file);
-
-                  const reader = new FileReader();
-                  reader.readAsDataURL(compressed);
-
-                  reader.onload = () => {
-                    setField("signature", reader.result as string);
-                  };
-                }}
-              />
-
-              {/* 🔥 TOMBOL CUSTOM */}
-              <label
-                htmlFor="signatureUpload"
-                className="cursor-pointer inline-block px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-              >
-                Upload Tanda Tangan
-              </label>
-
-              {/* PREVIEW */}
-              {form.signature && (
-                <div className="mt-3">
-                  <p className="text-sm text-green-600">
-                    ✔ Tanda tangan berhasil diupload
-                  </p>
-                  <img
-                    src={form.signature}
-                    className="mt-2 w-40 border rounded"
-                  />
-                </div>
-              )}
-            </div>
-          )}
           {/* BUTTON */}
           <button
             type="submit"
