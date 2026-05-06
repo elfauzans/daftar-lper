@@ -8,6 +8,7 @@ export interface RegisterPayload {
   provinsi: string;
   pekerjaan: string;
   hp: string;
+  email: string;
   nik: string;
   gender: "L" | "P";
   signature: string;
@@ -32,6 +33,7 @@ export const registerService = async (
     formData.append("provinsi", payload.provinsi);
     formData.append("pekerjaan", payload.pekerjaan);
     formData.append("hp", payload.hp);
+    formData.append("email", payload.email);
     formData.append("nik", payload.nik);
 
     // ✅ TAMBAHAN BARU

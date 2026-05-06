@@ -283,6 +283,20 @@ export default function RegisterForm() {
             )}
           </div>
 
+          {/* EMAIL */}
+          <div>
+            <label className="text-sm font-medium">Email</label>
+
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setField("email", e.target.value)}
+              className="w-full mt-1 p-3 rounded-lg border focus:ring-2 focus:ring-green-500 outline-none"
+              placeholder="Masukkan email Anda"
+              required
+            />
+          </div>
+
           <div>
             <label className="text-sm font-medium">Jenis Kelamin</label>
 

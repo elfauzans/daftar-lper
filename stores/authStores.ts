@@ -19,6 +19,7 @@ const initialForm: RegisterPayload = {
   provinsi: "",
   pekerjaan: "",
   hp: "",
+  email: "",
   nik: "",
   gender: "L", // default bisa L / kosong juga boleh
   signature: "", // base64
