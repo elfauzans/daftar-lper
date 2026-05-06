@@ -21,12 +21,24 @@ export default function Footer() {
         </p>
 
         {/* CTA BUTTON */}
-        <div className="mt-8">
+        {/* CTA BUTTON */}
+        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+          {/* Tombol Daftar */}
           <a
             href="#daftar"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white hover:bg-white hover:text-[#243b6b] transition-all duration-300 font-semibold"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-white hover:bg-white hover:text-[#243b6b] transition-all duration-300 font-semibold"
           >
             Daftar Sekarang →
+          </a>
+
+          {/* Tombol Website Utama */}
+          <a
+            href="https://koperasilper.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-[#243b6b] hover:bg-gray-200 transition-all duration-300 font-semibold"
+          >
+            Tentang Kami
           </a>
         </div>
 
