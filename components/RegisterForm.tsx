@@ -96,6 +96,7 @@ export default function RegisterForm() {
 
   const [openProv, setOpenProv] = useState(false);
   const [keyword, setKeyword] = useState("");
+  const [openLoading, setOpenLoading] = useState(false);
 
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
     null,
@@ -534,15 +535,34 @@ export default function RegisterForm() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
 
             <AlertDialogAction
-              onClick={() => {
+              onClick={async () => {
                 setOpenConfirm(false);
-                submit(); // baru submit di sini
+                setOpenLoading(true); // 🔥 tampilkan loading
+
+                try {
+                  await submit(); // pastikan submit async
+                } finally {
+                  setOpenLoading(false); // 🔥 hilangin loading
+                }
               }}
               className="bg-green-500 hover:bg-green-600"
             >
               Ya, Kirim
             </AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={openLoading}>
+        <AlertDialogContent className="flex flex-col items-center justify-center text-center gap-4">
+          {/* Spinner */}
+          <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+
+          <AlertDialogTitle>Memproses...</AlertDialogTitle>
+
+          <AlertDialogDescription>
+            Mohon tunggu, data Anda sedang dikirim.
+          </AlertDialogDescription>
         </AlertDialogContent>
       </AlertDialog>
     </section>
